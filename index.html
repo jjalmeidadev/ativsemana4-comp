@@ -23,7 +23,7 @@
                 default: 'arcade',
                 arcade: {
                     gravity: { y: 300},
-                    debug: true
+                    debug:true
                 }
             },
 
@@ -43,11 +43,20 @@
 
         //var que guarda a movimentação do alien
         var teclado;
+
+        var terra;
+        var terra2;
+        var terra3;
+        var chao;
+
+        var monstro;
        
 
         function preload() {
             this.load.image('background', 'assets/bg.png', window.innerWidth, window.innerHeight);
+            this.load.image('terra', 'assets/terra.png');
             this.load.spritesheet('player','assets/spriteperson.png', {frameWidth: 80, frameHeight: 60});
+            this.load.spritesheet('monstro','assets/monstro.png', {frameWidth: 110, frameHeight: 140});
         }
 
         function create() {
@@ -59,34 +68,64 @@
             player = this.physics.add.sprite(100, 300, 'player').setScale(1.3);; 
             player.setCollideWorldBounds(true);
 
+            player.body.setSize(50, 22);
+
             //atribuição das teclas à variável teclado.
             teclado = this.input.keyboard.createCursorKeys();
+
+             //adição da imagem estática do tijolo
+            terra = this.physics.add.staticImage(400,300 , 'terra');
+            this.physics.add.collider(player, terra)
+
+            terra2 = this.physics.add.staticImage(900,500 , 'terra');
+            this.physics.add.collider(player, terra2)
+
+            terra3 = this.physics.add.staticImage(1000,200 , 'terra');
+            this.physics.add.collider(player, terra3)
+
+            chao = this.physics.add.staticImage(700, 720, 'terra').setScale(6)
+            this.physics.add.collider(player, chao)
+            chao.body.setSize(4000, 561);
+
+
+            monstro = this.physics.add.staticImage(650, -20, 'monstro');
+            monstro.setCollideWorldBounds(true);
+            this.physics.add.collider(monstro, terra);
+            this.physics.add.collider(monstro, terra2);
+            this.physics.add.collider(monstro, terra3);
+            this.physics.add.collider(monstro, chao)
+            monstro.body.setSize(19, 22);
+            
+            monstro.setVisible(false); 
+                var posicaoMonstro_Y = Phaser.Math.RND.between(50, 650);
+                monstro.setPosition(posicaoMonstro_Y, 100);
+
 
            // Animações do player
         this.anims.create({
             key: 'walk_down',
-            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 5 }),
+            frames: this.anims.generateFrameNumbers('player', { start: 11, end: 11}),
             frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_right',
-            frames: this.anims.generateFrameNumbers('player', { start: 6, end: 11 }),
+            frames: this.anims.generateFrameNumbers('player', { start: 5, end: 10 }),
             frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_up',
-            frames: this.anims.generateFrameNumbers('player', { start: 11, end: 0 }),
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
             frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_left',
-            frames: this.anims.generateFrameNumbers('player', { start: 6, end: 11 }),
+            frames: this.anims.generateFrameNumbers('player', { start: 5, end: 11 }),
             frameRate: 10,
             repeat: -1
         });
@@ -95,28 +134,31 @@
         function update() {
             //movimento para a esquerda
             if(teclado.left.isDown){
-                player.setVelocityX(-150);
+                player.setVelocityX(-200);
             
-                this.player.anims.play('walk_left', true);}
+                player.anims.play('walk_left', true);}
 
             //movimento para a direita
             else if (teclado.right.isDown){
-                    player.setVelocityX(150);
+                    player.setVelocityX(200);
 
-                    this.player.anims.play('walk_right', true);
+                
+                    player.anims.play('walk_right', true);
                 }
 
             //sem movimento horizontal
             else{
+                
                 player.setVelocityX(0);}
 
             //movimento para cima
             if (teclado.up.isDown) {
-                player.setVelocityY(-150);
+                player.setVelocityY(-200);
 
-                this.player.anims.play('walk_up', true);
+                player.anims.play('walk_up', true);
                
-            }
+            } 
+
 
             //movimento para baixo
             
