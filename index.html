@@ -1,169 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Rush Odyssey</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <style> body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; } </style>
-</head>
+    <style> body {display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;}</style>
+  </head>
 
-<body>
+  <body>
     <script>
+      const config = {
+        type: Phaser.AUTO,
+        width: window.innerWidth,
+        height: window.innerHeight,
 
-        // o que essa parte faz? A aplicação do Phaser levando em conta os valores das variáveis recém criadas como formatação da página é realizada.
-        const config = {
-            type: Phaser.AUTO,
-            width: window.innerWidth,
-            height: window.innerHeight,
+        // Configuração da física do jogo
+        physics: {
+          default:"arcade",
+          arcade: {gravity: { y: 300 }},
+        },
 
+        scene: {
+          preload: preload,
+          create: create,
+          update: update,
+        },
+      };
 
-        // aplicação das físicas na configuração do jogo, atrabuindo o valor de 300 para a gravidade do eixo Y.
-            physics: {
-                default: 'arcade',
-                arcade: {
-                    gravity: { y: 300},
-                    debug:true
-                }
-            },
+      const game = new Phaser.Game(config);
 
+      // Variáveis globais para o jogador, teclado, cenário e pontuação
+      var player;
+      var teclado;
+      var terra;
+      var terra2;
+      var terra3;
+      var chao;
+      var monstro;
+      var pontuacao = 0;
+      var placar;
 
-            scene: {
-                preload: preload,
-                create: create,
-                update: update
-            }
-        };
+      
+      function preload() {
+        this.load.image("background","assets/bg.png", window.innerWidth,window.innerHeight);
+        this.load.image("terra", "assets/terra.png");
+        this.load.spritesheet("player", "assets/spriteperson.png", {frameWidth: 80, frameHeight: 60,});
+        this.load.spritesheet("monstro", "assets/monstro.png", {frameWidth: 110, frameHeight: 140,});
+      }
 
-        // o que acontece aqui? É criada a variável que carrega consigo as configurações do novo jogo.
-        const game = new Phaser.Game(config);
+      function create() {
+        // Adiciona o background
+        this.background = this.add.image(0, 0, "background").setOrigin(0, 0);
+        this.background.setDisplaySize(window.innerWidth, window.innerHeight);
 
-        //var que guarda a img do alien
-        var player
-
-        //var que guarda a movimentação do alien
-        var teclado;
-
-        var terra;
-        var terra2;
-        var terra3;
-        var chao;
-
-        var monstro;
-       
-
-        function preload() {
-            this.load.image('background', 'assets/bg.png', window.innerWidth, window.innerHeight);
-            this.load.image('terra', 'assets/terra.png');
-            this.load.spritesheet('player','assets/spriteperson.png', {frameWidth: 80, frameHeight: 60});
-            this.load.spritesheet('monstro','assets/monstro.png', {frameWidth: 110, frameHeight: 140});
-        }
-
-        function create() {
+        // Adiciona o sprite do jogador e seus respectivos tamanhos e posições
+        player = this.physics.add.sprite(100, 300, 'player').setScale(1.3);
+        player.setCollideWorldBounds(true);
+        player.body.setSize(50, 22);
         
-            this.background = this.add.image(0, 0, 'background').setOrigin(0, 0);
-            this.background.setDisplaySize(window.innerWidth, window.innerHeight);
-		
-            //física é aplicada ao sprite do alien.
-            player = this.physics.add.sprite(100, 300, 'player').setScale(1.3);; 
-            player.setCollideWorldBounds(true);
 
-            player.body.setSize(50, 22);
+        // Configura o teclado para controlar o jogador
+        teclado = this.input.keyboard.createCursorKeys();
 
-            //atribuição das teclas à variável teclado.
-            teclado = this.input.keyboard.createCursorKeys();
+        // Adiciona e configura os elementos do cenário
+        terra = this.physics.add.staticImage(400, 300, "terra");
+        this.physics.add.collider(player, terra);
 
-             //adição da imagem estática do tijolo
-            terra = this.physics.add.staticImage(400,300 , 'terra');
-            this.physics.add.collider(player, terra)
+        terra2 = this.physics.add.staticImage(900, 500, "terra");
+        this.physics.add.collider(player, terra2);
 
-            terra2 = this.physics.add.staticImage(900,500 , 'terra');
-            this.physics.add.collider(player, terra2)
+        terra3 = this.physics.add.staticImage(1000, 200, "terra");
+        this.physics.add.collider(player, terra3);
 
-            terra3 = this.physics.add.staticImage(1000,200 , 'terra');
-            this.physics.add.collider(player, terra3)
+        chao = this.physics.add.staticImage(700, 720, "terra").setScale(6);
+        this.physics.add.collider(player, chao);
+        chao.body.setSize(4000, 561);
 
-            chao = this.physics.add.staticImage(700, 720, 'terra').setScale(6)
-            this.physics.add.collider(player, chao)
-            chao.body.setSize(4000, 561);
+        // Adiciona o monstro e suas colisões
+        monstro = this.physics.add.sprite(650, -20, "monstro");
+        monstro.setCollideWorldBounds(true);
+        this.physics.add.collider(monstro, terra);
+        this.physics.add.collider(monstro, terra2);
+        this.physics.add.collider(monstro, terra3);
+        this.physics.add.collider(monstro, chao);
+        monstro.body.setSize(80, 125);
 
+        // Adiciona o placar
+        placar = this.add.text(90, 50, "Moedas:" + pontuacao, {
+          fontSize: "45px",
+          fill: "black",
+        });
 
-            monstro = this.physics.add.staticImage(650, -20, 'monstro');
-            monstro.setCollideWorldBounds(true);
-            this.physics.add.collider(monstro, terra);
-            this.physics.add.collider(monstro, terra2);
-            this.physics.add.collider(monstro, terra3);
-            this.physics.add.collider(monstro, chao)
-            monstro.body.setSize(19, 22);
-            
-            monstro.setVisible(false); 
-                var posicaoMonstro_Y = Phaser.Math.RND.between(50, 650);
-                monstro.setPosition(posicaoMonstro_Y, 100);
+        // Configura a colisão entre o jogador e o monstro
+        this.physics.add.overlap(player, monstro, function () {
+          monstro.setVisible(false); // Torna o monstro invisível
+          var posicaoMonstro_Y = Phaser.Math.RND.between(50, 650); // Sorteia uma nova posição para o monstro
+          monstro.setPosition(posicaoMonstro_Y, 100); // Ajusta a posição do monstro
+          pontuacao += 1; // Incrementa a pontuação
+          placar.setText("KILLS:" + pontuacao); //Texto do placar
+          monstro.setVisible(true); // Torna o monstro visível novamente
+        });
 
-
-           // Animações do player
+        // Cria as animações do jogador
         this.anims.create({
-            key: 'walk_down',
-            frames: this.anims.generateFrameNumbers('player', { start: 11, end: 11}),
-            frameRate: 10,
-            repeat: -1
+          key: "walk_down",
+          frames: this.anims.generateFrameNumbers("player", {start: 7, end: 8}),
+          frameRate: 10,
+          repeat: -1,
         });
 
         this.anims.create({
-            key: 'walk_right',
-            frames: this.anims.generateFrameNumbers('player', { start: 5, end: 10 }),
-            frameRate: 10,
-            repeat: -1
+          key: "walk_right",
+          frames: this.anims.generateFrameNumbers("player", {start: 5, end: 10,}),
+          frameRate: 10,
+          repeat: -1,
         });
 
         this.anims.create({
-            key: 'walk_up',
-            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
-            frameRate: 10,
-            repeat: -1
+          key: "walk_up",
+          frames: this.anims.generateFrameNumbers("player", {start: 10, end: 11,}),
+          frameRate: 10,
+          repeat: -1,
         });
 
         this.anims.create({
-            key: 'walk_left',
-            frames: this.anims.generateFrameNumbers('player', { start: 5, end: 11 }),
-            frameRate: 10,
-            repeat: -1
+          key: "walk_left",
+          frames: this.anims.generateFrameNumbers("player", { start: 4,end: 9,}),
+          frameRate: 10,
+          repeat: -1,
         });
+      }
+
+      function update() {
+        // Movimento para a esquerda
+        if (teclado.left.isDown) {
+          player.setVelocityX(-200);
+          player.anims.play("walk_left", true);
         }
 
-        function update() {
-            //movimento para a esquerda
-            if(teclado.left.isDown){
-                player.setVelocityX(-200);
-            
-                player.anims.play('walk_left', true);}
-
-            //movimento para a direita
-            else if (teclado.right.isDown){
-                    player.setVelocityX(200);
-
-                
-                    player.anims.play('walk_right', true);
-                }
-
-            //sem movimento horizontal
-            else{
-                
-                player.setVelocityX(0);}
-
-            //movimento para cima
-            if (teclado.up.isDown) {
-                player.setVelocityY(-200);
-
-                player.anims.play('walk_up', true);
-               
-            } 
-
-
-            //movimento para baixo
-            
+        // Movimento para a direita
+        else if (teclado.right.isDown) {
+          player.setVelocityX(200);
+          player.anims.play("walk_right", true);
         }
 
+        // Sem movimento horizontal
+        else {
+          player.setVelocityX(0);}
+
+        // Movimento para cima
+        if (teclado.up.isDown) {
+          player.setVelocityY(-200);
+          player.anims.play("walk_up", true);
+        }
+
+        // Movimento para baixo
+        else if (teclado.down.isDown) {
+          player.setVelocityY(200);
+          player.anims.play("walk_down", true);
+        } 
+
+      }
     </script>
-</body>
+  </body>
 </html>
