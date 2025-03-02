@@ -7,9 +7,9 @@ class RushOdyssey extends Phaser.Scene {
         arcade: { gravity: { y: 300 } },
       },
     });
-    var streak = (this.streak = 0); // Começa a sequência de kills
-    var tempultkill = (this.tempultkill = 0); // Analisa o tempo do último kill
-    var pontuacao = (this.pontuacao = 0); // Começa a pontuação
+    this.streak = 0; // Começa a sequência de kills
+    this.tempultkill = 0; // Analisa o tempo do último kill
+    this.pontuacao = 0; // Começa a pontuação
   }
 
   preload() {
@@ -45,15 +45,17 @@ class RushOdyssey extends Phaser.Scene {
 
     // Adiciona e configura os elementos do cenário
     this.terra = this.physics.add.staticImage(400, 300, "terra");
-    this.physics.add.collider(this.player, this.terra);
-
     this.terra2 = this.physics.add.staticImage(900, 500, "terra");
-    this.physics.add.collider(this.player, this.terra2);
-
     this.terra3 = this.physics.add.staticImage(1000, 200, "terra");
-    this.physics.add.collider(this.player, this.terra3);
-
     this.chao = this.physics.add.staticImage(700, 720, "terra").setScale(6);
+
+    // Adiciona os elementos do cenário a um array
+    this.terras = [this.terra, this.terra2, this.terra3];
+
+    // Configura as colisões
+    this.physics.add.collider(this.player, this.terra);
+    this.physics.add.collider(this.player, this.terra2);
+    this.physics.add.collider(this.player, this.terra3);
     this.physics.add.collider(this.player, this.chao);
     this.chao.body.setSize(4000, 561);
 
@@ -96,23 +98,13 @@ class RushOdyssey extends Phaser.Scene {
         this.monstro.setVisible(true); // Torna o monstro visível novamente
 
         // Sorteia novas posições para os elementos do cenário
-        this.terra.setPosition(
-          Phaser.Math.RND.between(100, 1100),
-          Phaser.Math.RND.between(100, 600)
-        );
-        this.terra.body.updateFromGameObject(); // Atualiza a hitbox do terra
-
-        this.terra2.setPosition(
-          Phaser.Math.RND.between(100, 1100),
-          Phaser.Math.RND.between(100, 600)
-        );
-        this.terra2.body.updateFromGameObject(); // Atualiza a hitbox do terra2
-
-        this.terra3.setPosition(
-          Phaser.Math.RND.between(100, 1100),
-          Phaser.Math.RND.between(100, 600)
-        );
-        this.terra3.body.updateFromGameObject(); // Atualiza a hitbox do terra3
+        for (let terra of this.terras) {
+          terra.setPosition(
+            Phaser.Math.RND.between(100, 1100),
+            Phaser.Math.RND.between(100, 600)
+          );
+          terra.body.updateFromGameObject(); // Atualiza a hitbox do terra
+        }
       },
       null, // Previne callback e crash
       this
